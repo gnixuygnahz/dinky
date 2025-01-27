@@ -22,9 +22,9 @@ import ColumnInfo from '@/pages/RegCenter/DataSource/components/DataSourceDetail
 import { DataSources } from '@/types/RegCenter/data';
 
 const GeneralJdbcDesc: React.FC<DataSources.SchemaDescProps> = (props) => {
-  const { tableInfo } = props;
+  const { queryParams,tableInfo } = props;
 
-  return <ColumnInfo columnInfo={tableInfo?.columns} />;
+  return <ColumnInfo columnInfo={tableInfo?.columns} tableInfo={tableInfo} queryParams={queryParams}/>;
 };
 
 export default GeneralJdbcDesc;

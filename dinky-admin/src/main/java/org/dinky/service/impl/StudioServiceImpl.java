@@ -33,6 +33,7 @@ import org.dinky.data.model.DataBase;
 import org.dinky.data.model.Schema;
 import org.dinky.data.model.Table;
 import org.dinky.data.result.DDLResult;
+import org.dinky.data.result.ColumnDataAnalysisResult;
 import org.dinky.data.result.IResult;
 import org.dinky.data.result.SelectResult;
 import org.dinky.executor.CustomTableEnvironment;
@@ -42,6 +43,7 @@ import org.dinky.explainer.sqllineage.SQLLineageBuilder;
 import org.dinky.job.JobConfig;
 import org.dinky.job.JobManager;
 import org.dinky.metadata.driver.Driver;
+import org.dinky.metadata.result.JdbcSelectResult;
 import org.dinky.service.ClusterInstanceService;
 import org.dinky.service.DataBaseService;
 import org.dinky.service.StudioService;
@@ -207,6 +209,26 @@ public class StudioServiceImpl implements StudioService {
                     FlinkTableMetadataUtil.getColumnList(customTableEnvironment, catalogName, database, tableName));
         }
         return columns;
+    }
+
+    @Override
+    public ColumnDataAnalysisResult getMSColumnDataAnalysis(StudioMetaStoreDTO studioMetaStoreDTO) {
+        String database = studioMetaStoreDTO.getDatabase();
+        String tableName = studioMetaStoreDTO.getTable();
+        ColumnDataAnalysisResult columnDataAnalysisResult = new ColumnDataAnalysisResult();
+        DataBase dataBase = dataBaseService.getById(studioMetaStoreDTO.getDatabaseId());
+        if (Asserts.isNotNull(dataBase)) {
+            Driver driver = Driver.build(dataBase.getDriverConfig());
+            JdbcSelectResult result = driver.query("select " + studioMetaStoreDTO.getColumn() + " as enums,count(*) as count from "
+                             + studioMetaStoreDTO.getDatabase() + "." + studioMetaStoreDTO.getTable()
+                            + " group by " + studioMetaStoreDTO.getColumn() + " order by count desc"
+                    ,100);
+            result.getRowData().forEach(row -> {
+                columnDataAnalysisResult.getFieldGroupCount().put(String.valueOf(row.get("enums")),Integer.parseInt(row.get("count").toString()));
+            });
+            return columnDataAnalysisResult;
+        }
+        return null;
     }
 
     private JobManager getJobManager(StudioMetaStoreDTO studioMetaStoreDTO, String envSql) {

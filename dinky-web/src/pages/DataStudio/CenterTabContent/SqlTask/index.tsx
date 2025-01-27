@@ -35,6 +35,7 @@ import {
   FullscreenExitOutlined,
   FullscreenOutlined,
   PartitionOutlined,
+  PlayCircleOutlined,
   RocketOutlined,
   RotateRightOutlined,
   SafetyCertificateOutlined,
@@ -72,6 +73,7 @@ import {
   changeTaskLife,
   debugTask,
   executeSql,
+  executeTempSql,
   explainSql,
   flinkJarFormConvertSql,
   flinkJarSqlConvertForm,
@@ -79,7 +81,7 @@ import {
   getTaskDetails
 } from '@/pages/DataStudio/service';
 import { l } from '@/utils/intl';
-import { editor } from 'monaco-editor';
+import { editor, KeyCode, KeyMod } from 'monaco-editor';
 import { DataStudioActionType } from '@/pages/DataStudio/data.d';
 import {
   getDataByParams,
@@ -215,6 +217,8 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
     formValuesInfo: {}
   });
 
+  const { searchTableName, setSearchTableName } = useModel('SearchTableInfoModel');
+
   useEffect(() => {
     if (sqlForm.enable) {
       setSqlForm((prevState) => ({
@@ -313,6 +317,7 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
     };
   }, [loading]);
 
+
   const editorDidMount = (editor: editor.IStandaloneCodeEditor, monaco: Monaco) => {
     editor.layout();
     editor.focus();
@@ -321,6 +326,20 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
     // @ts-ignore
     editor['id'] = currentState.taskId;
     registerEditorKeyBindingAndAction(editor);
+
+    // 查找表信息
+    editor?.addAction({
+      id: 'search_table_info',
+      label: l('shortcut.key.quickSearchTableInfo'), // 菜单名称
+      keybindings: [KeyMod.Alt | KeyCode.KeyQ], // 快捷键
+      // contextMenuGroupId: 'code_formatter',
+      contextMenuGroupId: 'custom',
+      contextMenuOrder: 1.5,
+      run: () => {
+        setSearchTableName(editorInstance!.current!.getModel()!.getValueInRange(editorInstance!.current!.getSelection()!) + "#")
+      }
+    })
+
   };
 
   const updateTask = (useServerVersion: boolean) => {
@@ -531,6 +550,52 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
       const result = await executeSql(
         l('pages.datastudio.editor.submitting', '', { jobName: title }),
         currentState.taskId
+      );
+      if (result.success) {
+        setCurrentState((prevState) => {
+          return {
+            ...prevState,
+            status: result.data.status === 'SUCCESS' ? 'RUNNING' : result.data.status
+          };
+        });
+        if (result.data.status === 'SUCCESS') {
+          setIsRunning(true);
+        }
+        if (isSql(currentState.dialect) && result?.data?.result?.success) {
+          updateAction({
+            actionType: DataStudioActionType.TASK_PREVIEW_RESULT,
+            params: {
+              taskId: currentState.taskId,
+              dialect: currentState.dialect,
+              columns: result.data.result.columns,
+              rowData: result.data.result.rowData
+            }
+          });
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [updateAction, currentState.envId, handleSave, currentState.taskId, currentState.dialect]);
+
+  const handleTempSubmit = useCallback(async () => {
+    const tempSql = editorInstance!.current!.getModel()!.getValueInRange(editorInstance!.current!.getSelection()!);
+    if (tempSql == '' || tempSql == null) {
+      return
+    }
+    setIsSubmitting(true);
+    try {
+      updateAction({
+        actionType: DataStudioActionType.TASK_RUN_SUBMIT,
+        params: {
+          taskId: currentState.taskId,
+          envId: currentState.envId
+        }
+      });
+      const result = await executeTempSql(
+        l('pages.datastudio.editor.submitting', '', { jobName: title }),
+        currentState.taskId,
+        tempSql
       );
       if (result.success) {
         setCurrentState((prevState) => {
@@ -872,12 +937,36 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
               desc={l('pages.datastudio.editor.exec')}
               icon={<CaretRightOutlined />}
               onClick={handleSubmit}
+              // hotKey={{
+              //   ...hotKeyConfig,
+              //   hotKeyDesc: 'Shift+F10',
+              //   hotKeyHandle: (e: KeyboardEvent) => e.shiftKey && e.key === 'F10'
+              // }}
+            />
+
+            <RunToolBarButton
+              isShow={
+                !isRunning &&
+                assert(
+                  currentState.dialect,
+                  [DIALECT.JAVA, DIALECT.SCALA, DIALECT.PYTHON_LONG, DIALECT.FLINKSQLENV],
+                  true,
+                  'notIncludes'
+                )
+              }
+              showDesc={showDesc}
+              disabled={isLockTask || isSubmitting}
+              color={'green'}
+              desc={l('pages.datastudio.editor.execTemp')}
+              icon={<PlayCircleOutlined />}
+              onClick={handleTempSubmit}
               hotKey={{
                 ...hotKeyConfig,
                 hotKeyDesc: 'Shift+F10',
                 hotKeyHandle: (e: KeyboardEvent) => e.shiftKey && e.key === 'F10'
               }}
             />
+
             <RunToolBarButton
               isShow={
                 !isRunning && assert(currentState.dialect, [DIALECT.FLINK_SQL], true, 'includes')

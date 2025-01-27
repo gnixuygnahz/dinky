@@ -29,10 +29,7 @@ import org.dinky.context.TenantContextHolder;
 import org.dinky.data.annotations.ProcessStep;
 import org.dinky.data.app.AppParamConfig;
 import org.dinky.data.constant.CommonConstant;
-import org.dinky.data.dto.AbstractStatementDTO;
-import org.dinky.data.dto.TaskDTO;
-import org.dinky.data.dto.TaskRollbackVersionDTO;
-import org.dinky.data.dto.TaskSubmitDto;
+import org.dinky.data.dto.*;
 import org.dinky.data.enums.CatalogTypeMappingEnum;
 import org.dinky.data.enums.GatewayType;
 import org.dinky.data.enums.JobLifeCycle;
@@ -336,6 +333,28 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         TaskDTO taskDTO = taskServiceBean.prepareTask(submitDto);
         // The statement set is enabled by default when submitting assignments
         taskDTO.setStatementSet(true);
+        JobResult jobResult = taskServiceBean.executeJob(taskDTO);
+        if ((jobResult.getStatus() == Job.JobStatus.FAILED)) {
+            throw new RuntimeException(jobResult.getError());
+        }
+        log.info("Job Submit success");
+        Task task = new Task(submitDto.getId(), jobResult.getJobInstanceId());
+        if (!this.updateById(task)) {
+            throw new BusException(Status.TASK_UPDATE_FAILED.getMessage());
+        }
+        return jobResult;
+    }
+
+    @Override
+    public JobResult submitTempTask(TempTaskSubmitDto tempSubmitDto) throws Exception {
+        // 注解自调用会失效，这里通过获取对象方法绕过此限制
+        TaskServiceImpl taskServiceBean = applicationContext.getBean(TaskServiceImpl.class);
+        TaskSubmitDto submitDto = new TaskSubmitDto();
+        BeanUtil.copyProperties(tempSubmitDto, submitDto);
+        TaskDTO taskDTO = taskServiceBean.prepareTask(submitDto);
+        // The statement set is enabled by default when submitting assignments
+        taskDTO.setStatementSet(true);
+        taskDTO.setStatement(tempSubmitDto.getStatement());
         JobResult jobResult = taskServiceBean.executeJob(taskDTO);
         if ((jobResult.getStatus() == Job.JobStatus.FAILED)) {
             throw new RuntimeException(jobResult.getError());

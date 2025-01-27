@@ -66,6 +66,9 @@ public class StudioMetaStoreDTO extends AbstractStatementDTO {
             notes = "The identifier of the database")
     private Integer databaseId;
 
+    @ApiModelProperty(value = "Column", dataType = "String", example = "my_column", notes = "The name of the column")
+    private String column;
+
     public JobConfig getJobConfig() {
         return JobConfig.builder()
                 .type(GatewayType.LOCAL.getLongValue())

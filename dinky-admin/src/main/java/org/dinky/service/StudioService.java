@@ -25,6 +25,7 @@ import org.dinky.data.dto.StudioMetaStoreDTO;
 import org.dinky.data.model.Catalog;
 import org.dinky.data.model.Column;
 import org.dinky.data.model.Schema;
+import org.dinky.data.result.ColumnDataAnalysisResult;
 import org.dinky.data.result.IResult;
 import org.dinky.data.result.SelectResult;
 import org.dinky.explainer.lineage.LineageResult;
@@ -53,4 +54,6 @@ public interface StudioService {
     Schema getMSSchemaInfo(StudioMetaStoreDTO studioMetaStoreDTO);
 
     List<Column> getMSColumns(StudioMetaStoreDTO studioMetaStoreDTO);
+
+    ColumnDataAnalysisResult getMSColumnDataAnalysis(StudioMetaStoreDTO studioMetaStoreDTO);
 }

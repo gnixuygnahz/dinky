@@ -27,12 +27,12 @@ import {
   FunctionOutlined,
   TableOutlined
 } from '@ant-design/icons';
-import { connect } from '@umijs/max';
-import { Button, Col, Empty, Flex, Modal, Row, Select, Spin } from 'antd';
+import { connect, useModel } from '@umijs/max';
+import { Button, Col, Empty, Flex, Input, Modal, Row, Select, Spin } from 'antd';
 import { DataNode } from 'antd/es/tree';
 import DirectoryTree from 'antd/es/tree/DirectoryTree';
 import { DefaultOptionType } from 'rc-select/lib/Select';
-import React, { useEffect, useState } from 'react';
+import React, { Key, useCallback, useEffect, useRef, useState } from 'react';
 import { getMSCatalogs, getMSColumns, getMSSchemaInfo } from './service';
 import { useAsyncEffect } from 'ahooks';
 import { CenterTab, DataStudioState } from '@/pages/DataStudio/model';
@@ -40,6 +40,7 @@ import { mapDispatchToProps } from '@/pages/DataStudio/DvaFunction';
 import { isSql } from '@/pages/DataStudio/utils';
 import { TableDataNode } from '@/pages/DataStudio/Toolbar/Catalog/data';
 import { DataStudioActionType } from '@/pages/DataStudio/data.d';
+import SchemaTree from '@/pages/RegCenter/DataSource/components/DataSourceDetail/SchemaTree';
 
 type CatalogState = {
   envId?: number;
@@ -65,8 +66,27 @@ const Catalog = (props: {
   const [row, setRow] = useState<TableDataNode>();
   const [loading, setLoading] = useState<boolean>(false);
   const [currentState, setCurrentState] = useState<CatalogState>();
+  const [treeHeight, setTreeHeight] = useState<number>(100);
+  const ref = useRef<HTMLDivElement>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Key[]>([]);
+  const [expandKeys, setExpandKeys] = useState<Key[]>([]);
+  const [searchValue, setSearchValue] = useState('');
+  const { searchTableName, setSearchTableName } = useModel('SearchTableInfoModel');
 
   const currentData = tabs.find((tab) => activeTab == tab.id);
+
+  useEffect(() => {
+    // 监控布局宽度高度变化，重新计算树的高度
+    const element = ref.current!!;
+    const observer = new ResizeObserver((entries) => {
+      if (entries?.length === 1) {
+        // 这里节点理应为一个，减去的高度是为搜索栏的高度
+        setTreeHeight(entries[0].contentRect.height - 55);
+      }
+    });
+    observer.observe(element);
+    return () => observer.unobserve(element);
+  }, []);
 
   useEffect(() => {
     if (
@@ -123,6 +143,12 @@ const Catalog = (props: {
   }, [currentState]);
 
   useAsyncEffect(async () => {
+    if (searchValue != '') {
+      setExpandKeys(['tables','views','functions','userFunctions','modules'])
+    }
+  }, [searchValue]);
+
+  useAsyncEffect(async () => {
     if (table && currentState) {
       const { envId, dialect, databaseId } = currentState;
       setLoading(true);
@@ -139,6 +165,23 @@ const Catalog = (props: {
       setRow({ ...row, columns: res });
     }
   }, [table]);
+
+  useAsyncEffect(async () => {
+    const searchTableNameFit = searchTableName.replaceAll("`","").replaceAll("'","").replaceAll("\"","")
+    const names = searchTableNameFit.split('.');
+    if (names.length == 3) { 
+      onRefreshTreeData(names[0] + '.' + names[1])
+      setSearchValue(names[2])
+    }
+    if (names.length == 2) { 
+      onRefreshTreeData(names[0])
+      setSearchValue(names[1])
+    }
+    if (names.length == 1) { 
+      // onRefreshTreeData('default_catalog.default_database')
+      setSearchValue(names[0])
+    }
+  }, [searchTableName])
 
   const onRefreshTreeData = (catalogAndDatabase: string) => {
     if (!currentState) {
@@ -199,7 +242,7 @@ const Catalog = (props: {
           });
         }
         treeDataTmp.push({
-          title: 'tables',
+          title: '表',
           key: 'tables',
           children: tablesData
         });
@@ -216,7 +259,7 @@ const Catalog = (props: {
           }
         }
         treeDataTmp.push({
-          title: 'views',
+          title: '视图',
           key: 'views',
           children: viewsData
         });
@@ -233,7 +276,7 @@ const Catalog = (props: {
           }
         }
         treeDataTmp.push({
-          title: 'functions',
+          title: '系统函数',
           key: 'functions',
           children: functionsData
         });
@@ -250,7 +293,7 @@ const Catalog = (props: {
           }
         }
         treeDataTmp.push({
-          title: 'user functions',
+          title: '自定义函数',
           key: 'userFunctions',
           children: userFunctionsData
         });
@@ -267,14 +310,14 @@ const Catalog = (props: {
           }
         }
         treeDataTmp.push({
-          title: 'modules',
+          title: '模块',
           key: 'modules',
           children: modulesData
         });
 
         setTreeData(treeDataTmp);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const getCatalogs = async () => {
@@ -335,56 +378,139 @@ const Catalog = (props: {
     setModalVisit(false);
     setTable('');
   };
+
+  /**
+   * 树节点展开事件
+   * @param {Key[]} expandedKeys
+   */
+  const handleTreeExpand = (expandedKeys: Key[]) => {
+    setExpandKeys(expandedKeys);
+  };
+
+  /**
+   * 树节点点击事件 添加tab页 并传递参数
+   * @param keys
+   * @param info
+   */
+  const handleTreeNodeClick = async (keys: Key[], info: any) => {
+    // 选中的key
+    setSelectedKeys(keys);
+  }
+
+    /**
+     * search tree node
+     * @type {(e: {target: {value: React.SetStateAction<string>}}) => void}
+     */
+    const onSearchChange = useCallback(
+      (e: { target: { value: React.SetStateAction<string> } }) => {
+        setSearchValue(e.target.value);
+      },
+      [searchValue]
+    );
+
+    const buildSchemaTree = (data: any, searchValue = ''): any =>
+      data.map((item: any) => {
+        return {
+          ...item,
+          children: item.children
+            // filter table by search value and map table to tree node
+            .filter((item: any) => 
+              (searchValue.indexOf("#") > -1 && (item.name == searchValue.replaceAll("#","") || item.comment == searchValue.replaceAll("#","")))
+            || (searchValue.indexOf("#") == -1 && (item.name.indexOf(searchValue) > -1 || item.comment.indexOf(searchValue) > -1))
+          )
+            .map((item: any) => {
+              return {
+                ...item
+              };
+            })
+        };
+      });
+
   // <Empty description={l('pages.datastudio.catalog.openMission')}/>;
   return (
-    <Spin spinning={loading} style={{ height: 'inherit' }}>
-      <Flex vertical style={{ paddingInline: 10, paddingBlock: 5, height: '100%' }}>
-        <Row style={{ paddingBlock: 10 }}>
-          <Col span={24}>
-            <Select
-              value={database ? database : null}
-              style={{ width: '100%' }}
-              placeholder={l('pages.datastudio.catalog.catalogSelect')}
-              optionLabelProp='label'
-              onChange={onChangeMetaStoreCatalogs}
-              options={catalogSelect}
-            />
-          </Col>
-        </Row>
+    <div style={{ height: 'inherit' }} ref={ref}>
+      <Spin spinning={loading} style={{ height: 'inherit' }}>
+        <Flex vertical style={{ paddingInline: 10, paddingBlock: 5, height: '100%' }}>
+          <Row style={{ paddingBlock: 10 }}>
+            <Col span={24}>
+              <Select
+                value={database ? database : null}
+                style={{ width: '100%' }}
+                placeholder={l('pages.datastudio.catalog.catalogSelect')}
+                optionLabelProp='label'
+                onChange={onChangeMetaStoreCatalogs}
+                options={catalogSelect}
+              />
+            </Col>
+          </Row>
 
-        {treeData.length > 0 ? (
+          {treeData.length > 0 ? (
+            // <DirectoryTree
+            //   height={treeHeight - 40}
+            //   showIcon
+            //   switcherIcon={<DownOutlined />}
+            //   treeData={treeData}
+            //   onRightClick={({ node }: any) => openColumnInfo(node)}
+            //   onSelect={(_, info: any) => openColumnInfo(info.node)}
+            // />
+            <>
+          <Input
+            placeholder={l('global.search.text')}
+            allowClear
+            style={{ marginBottom: 8 }}
+            value={searchValue}
+            onChange={onSearchChange}
+          />
           <DirectoryTree
+            height={treeHeight - 40}
+            expandedKeys={expandKeys}
+            selectedKeys={selectedKeys}
+            onExpand={handleTreeExpand}
+            // onSelect={handleTreeNodeClick}
             showIcon
             switcherIcon={<DownOutlined />}
-            treeData={treeData}
+            treeData={buildSchemaTree(treeData, searchValue)}
             onRightClick={({ node }: any) => openColumnInfo(node)}
             onSelect={(_, info: any) => openColumnInfo(info.node)}
+            titleRender={(data: any)=><>{data.title}{data.comment&&<span style={{color:"gray",fontSize:12}}>&nbsp;-&nbsp;{data.comment}</span>}</>}
           />
-        ) : (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        )}
-      </Flex>
-      <Modal
-        title={<>{row?.key}</>}
-        open={modalVisit}
-        width={'85%'}
-        onCancel={() => {
-          cancelHandle();
-        }}
-        footer={[
-          <Button
-            key='back'
-            onClick={() => {
-              cancelHandle();
-            }}
-          >
-            {l('button.close')}
-          </Button>
-        ]}
-      >
-        <SchemaDesc tableInfo={row} />
-      </Modal>
-    </Spin>
+        </>
+
+            // <SchemaTree
+            //   selectKeys={selectedKeys}
+            //   expandKeys={expandKeys}
+            //   height={treeHeight - 40}
+            //   onNodeClick={handleTreeNodeClick}
+            //   treeData={treeData}
+            //   onExpand={handleTreeExpand}
+            // />
+          ) : (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          )}
+        </Flex>
+        <Modal
+          title={<>{row?.key}</>}
+          open={modalVisit}
+          width={'85%'}
+          onCancel={() => {
+            cancelHandle();
+          }}
+          footer={[
+            <Button
+              key='back'
+              onClick={() => {
+                cancelHandle();
+              }}
+            >
+              {l('button.close')}
+            </Button>
+          ]}
+        >
+          <SchemaDesc tableInfo={row} queryParams={{id:currentState?.databaseId!,schemaName: '',
+  tableName: ''}}/>
+        </Modal>
+      </Spin>
+    </div>
   );
 };
 export default connect(

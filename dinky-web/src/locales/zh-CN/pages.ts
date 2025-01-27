@@ -317,7 +317,7 @@ export default {
    *
    * */
 
-  'layouts.userLayout.title': 'Dinky 实时计算平台',
+  'layouts.userLayout.title': '分行实时计算平台',
   /**
    *
    * login
@@ -404,6 +404,7 @@ export default {
   'pages.datastudio.editor.check': '检查',
   'pages.datastudio.editor.debug': '查询',
   'pages.datastudio.editor.exec': '运行',
+  'pages.datastudio.editor.execTemp': '运行选中',
   'pages.datastudio.editor.exec.error': '任务【{jobName}】执行失败',
   'pages.datastudio.editor.debug.error': '任务【{jobName}】调试失败',
   'pages.datastudio.editor.debug.success': '查询成功',

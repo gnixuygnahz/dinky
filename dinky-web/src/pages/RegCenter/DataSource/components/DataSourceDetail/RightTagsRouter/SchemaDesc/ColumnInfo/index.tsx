@@ -23,15 +23,47 @@ import { l } from '@/utils/intl';
 import { CheckSquareOutlined, KeyOutlined } from '@ant-design/icons';
 import { ProTable } from '@ant-design/pro-components';
 import { ProColumns } from '@ant-design/pro-table/es/typing';
-import React from 'react';
-import { Empty } from 'antd';
+import React, { useState } from 'react';
+import { Empty, Modal, Table } from 'antd';
+import { getMSColumnDataAnalysis, getMSColumns } from '@/pages/DataStudio/Toolbar/Catalog/service';
+import { QueryParams } from '../../data';
 
 type ColumnInfoProps = {
   columnInfo?: Partial<DataSources.Column[]>;
+  tableInfo?: Partial<DataSources.Table>;
+  queryParams?: QueryParams;
 };
 
 const ColumnInfo: React.FC<ColumnInfoProps> = (props) => {
-  const { columnInfo } = props;
+  const { queryParams,columnInfo,tableInfo } = props;
+  const [dataAnalysisDs, setDataAnalysisDs] = useState<any[]>([]);
+  const [isDataAnalysisOpen, setIsDataAnalysisOpen] = useState(false);
+  const [dataAnalysisloading, setDataAnalysisLoading] = React.useState<boolean>(true);
+  const showDataAnalysis = async(record:any) => {
+
+    const res = await getMSColumnDataAnalysis({
+      databaseId:queryParams?.id,
+      catalog:tableInfo?.catalog,
+      database:tableInfo?.schema,
+      table:tableInfo?.name,
+      dialect:tableInfo?.driverType?.toLocaleLowerCase(),
+      column:record.name
+    });
+    let gourp:any[] = [];
+
+    Object.keys(res.fieldGroupCount).forEach(key => {
+      gourp.push({
+        enums:key,
+        count:res.fieldGroupCount[key]
+      })
+    });
+    setDataAnalysisDs(gourp)
+    setDataAnalysisLoading(false);
+  };
+
+  const handleDataAnalysisOk = () => {
+    setIsDataAnalysisOpen(false);
+  };
 
   const columns: ProColumns<DataSources.Column>[] = [
     // {
@@ -128,6 +160,34 @@ const ColumnInfo: React.FC<ColumnInfoProps> = (props) => {
       title: l('rc.ds.comment'),
       dataIndex: 'comment',
       ellipsis: true
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      key: 'option',
+      render: (text, record, _, action) => [
+        <a
+          key="data_analysis"
+          onClick={() => {
+            setDataAnalysisLoading(true);
+            setIsDataAnalysisOpen(true);
+            showDataAnalysis(record);
+          }}
+        >
+          数据探查
+        </a>,
+        // <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
+        //   查看
+        // </a>,
+        // <TableDropdown
+        //   key="actionGroup"
+        //   onSelect={() => action?.reload()}
+        //   menus={[
+        //     { key: 'copy', name: '复制' },
+        //     { key: 'delete', name: '删除' },
+        //   ]}
+        // />,
+      ],
     }
   ];
 
@@ -150,6 +210,26 @@ const ColumnInfo: React.FC<ColumnInfoProps> = (props) => {
       ) : (
         <Empty className={'code-content-empty'} description={l('rc.ds.detail.tips')} />
       )}
+      <Modal title="探测结果"
+      cancelButtonProps={{ disabled: true }}
+      open={isDataAnalysisOpen} onOk={handleDataAnalysisOk} footer={null} closable={true}
+      onCancel={handleDataAnalysisOk}
+      loading={dataAnalysisloading}>
+        <Table dataSource={dataAnalysisDs}
+        // pagination={false}
+        columns={[
+           {
+            title: '枚举值',
+            dataIndex: 'enums',
+            key: 'enums',
+          },
+          {
+            title: '数量',
+            dataIndex: 'count',
+            key: 'count',
+          },
+        ]} />
+      </Modal>
     </>
   );
 };

@@ -25,5 +25,6 @@ export default {
   'shortcut.key.formatSelection': '格式化选中内容',
   'shortcut.key.notes': '注释/取消注释该行(区域)',
   'shortcut.key.upperCase': '转为大写',
-  'shortcut.key.lowerCase': '转为小写'
+  'shortcut.key.lowerCase': '转为小写',
+  'shortcut.key.quickSearchTableInfo': '查找表信息'
 };

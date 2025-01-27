@@ -29,6 +29,7 @@ export type StudioMetaStoreParam = {
   catalog?: string;
   database?: string;
   table?: string;
+  column?: string;
 };
 
 export type TableDataNode = {

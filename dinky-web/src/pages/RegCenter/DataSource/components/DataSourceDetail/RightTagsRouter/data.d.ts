@@ -36,4 +36,5 @@ export type QueryParams = {
   id: number;
   schemaName: string;
   tableName: string;
+  type?: string;
 };
