@@ -44,6 +44,7 @@ public enum Dialect {
     HIVE("Hive"),
     STAR_ROCKS("StarRocks"),
     PRESTO("Presto"),
+    JYTHON("Jython"),
     KUBERNETES_APPLICATION("KubernetesApplication");
 
     private String value;
@@ -127,6 +128,16 @@ public enum Dialect {
         switch (dialect) {
             case FLINK_JAR:
             case KUBERNETES_APPLICATION:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isJython(String value) {
+        Dialect dialect = Dialect.get(value);
+        switch (dialect) {
+            case JYTHON:
                 return true;
             default:
                 return false;
