@@ -135,6 +135,10 @@ public abstract class AbstractJdbcDriver extends AbstractDriver<AbstractJdbcConf
         ds.setInitialSize(1);
         ds.setMaxActive(8);
         ds.setMinIdle(5);
+        ds.setMinEvictableIdleTimeMillis(60000);
+        ds.setValidationQueryTimeout(5000);
+        ds.setMaxEvictableIdleTimeMillis(60000);
+        ds.setTimeBetweenEvictionRunsMillis(60000);
     }
 
     @Override

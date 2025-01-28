@@ -29,6 +29,7 @@ import org.dinky.data.enums.Status;
 import org.dinky.data.model.Catalog;
 import org.dinky.data.model.Column;
 import org.dinky.data.model.Schema;
+import org.dinky.data.result.ColumnDataAnalysisResult;
 import org.dinky.data.result.IResult;
 import org.dinky.data.result.Result;
 import org.dinky.data.result.SelectResult;
@@ -166,5 +167,17 @@ public class StudioController {
     })
     public Result<List<Column>> getMSColumns(@RequestBody StudioMetaStoreDTO studioMetaStoreDTO) {
         return Result.succeed(studioService.getMSColumns(studioMetaStoreDTO));
+    }
+
+    @PostMapping("/getMSColumnDataAnalysis")
+    @ApiOperation("Get Column DataAnalysis Info")
+    @ApiImplicitParam(
+            name = "studioMetaStoreDTO",
+            value = "Get Column DataAnalysis Info",
+            required = true,
+            dataType = "StudioMetaStoreDTO",
+            paramType = "body")
+    public Result<ColumnDataAnalysisResult> getMSColumnDataAnalysis(@RequestBody StudioMetaStoreDTO studioMetaStoreDTO) {
+        return Result.succeed(studioService.getMSColumnDataAnalysis(studioMetaStoreDTO));
     }
 }

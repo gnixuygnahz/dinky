@@ -455,6 +455,7 @@ export default {
   'pages.datastudio.editor.check': 'Check',
   'pages.datastudio.editor.debug': 'Search',
   'pages.datastudio.editor.exec': 'Execute',
+  'pages.datastudio.editor.execTemp': 'Execute Selection',
   'pages.datastudio.editor.exec.error': 'Task [{jobName}] execution failed',
   'pages.datastudio.editor.debug.error': 'Task [{jobName}] debug failed',
   'pages.datastudio.editor.exec.success': 'Submit succeeded',

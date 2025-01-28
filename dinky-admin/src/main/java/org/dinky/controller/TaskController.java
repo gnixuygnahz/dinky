@@ -24,10 +24,7 @@ import org.dinky.data.annotations.ExecuteProcess;
 import org.dinky.data.annotations.Log;
 import org.dinky.data.annotations.ProcessId;
 import org.dinky.data.annotations.TaskId;
-import org.dinky.data.dto.TaskDTO;
-import org.dinky.data.dto.TaskRollbackVersionDTO;
-import org.dinky.data.dto.TaskSaveDTO;
-import org.dinky.data.dto.TaskSubmitDto;
+import org.dinky.data.dto.*;
 import org.dinky.data.enums.BusinessType;
 import org.dinky.data.enums.JobLifeCycle;
 import org.dinky.data.enums.ProcessType;
@@ -101,6 +98,21 @@ public class TaskController {
     public Result<JobResult> submitTask(@TaskId @ProcessId @RequestParam Integer id) throws Exception {
         JobResult jobResult =
                 taskService.submitTask(TaskSubmitDto.builder().id(id).build());
+        if (jobResult.isSuccess()) {
+            return Result.succeed(jobResult, Status.EXECUTE_SUCCESS);
+        } else {
+            return Result.failed(jobResult, jobResult.getError());
+        }
+    }
+
+    @GetMapping("/submitTempTask")
+    @ApiOperation("Submit Temp Task")
+    @Log(title = "Submit Temp Task", businessType = BusinessType.SUBMIT)
+    @ExecuteProcess(type = ProcessType.FLINK_SUBMIT)
+    @CheckTaskOwner(checkParam = TaskId.class, checkInterface = TaskService.class)
+    public Result<JobResult> submitTempTask(@TaskId @ProcessId @RequestParam Integer id, @RequestParam String statement) throws Exception {
+        JobResult jobResult =
+                taskService.submitTempTask(TempTaskSubmitDto.builder().id(id).statement(statement).build());
         if (jobResult.isSuccess()) {
             return Result.succeed(jobResult, Status.EXECUTE_SUCCESS);
         } else {

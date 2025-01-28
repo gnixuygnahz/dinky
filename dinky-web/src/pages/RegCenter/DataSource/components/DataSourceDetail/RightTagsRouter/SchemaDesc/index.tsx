@@ -31,7 +31,7 @@ const SchemaDesc: React.FC<DataSources.SchemaDescProps> = (props) => {
     if (tableInfo?.driverType == DATA_SOURCE_TYPE.PAIMON) {
       return <PaimonDesc tableInfo={tableInfo} queryParams={queryParams} />;
     } else {
-      return <GeneralJdbcDesc tableInfo={tableInfo} />;
+      return <GeneralJdbcDesc tableInfo={tableInfo} queryParams={queryParams} />;
     }
   };
 

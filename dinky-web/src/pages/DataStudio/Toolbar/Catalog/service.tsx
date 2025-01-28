@@ -30,3 +30,6 @@ export async function getMSCatalogs(params: StudioMetaStoreParam) {
 export async function getMSColumns(params: StudioMetaStoreParam) {
   return (await postAll(API_CONSTANTS.STUDIO_GET_MSCOLUMNS, params)).data;
 }
+export async function getMSColumnDataAnalysis(params: StudioMetaStoreParam) {
+  return (await postAll(API_CONSTANTS.STUDIO_GET_COLUMNDATAANALYSIS, params)).data;
+}

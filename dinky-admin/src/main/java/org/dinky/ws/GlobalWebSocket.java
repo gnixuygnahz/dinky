@@ -32,12 +32,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 
 import org.springframework.stereotype.Component;
@@ -195,5 +192,18 @@ public class GlobalWebSocket {
                 SpringUtil.getBean(GlobalWebSocket.class).onError(session, e);
             }
         });
+    }
+
+    public static void safeSendText(Session session, String text) throws IOException {
+        session.getAsyncRemote().setSendTimeout(2000);
+        try {
+            Future<Void> future = session.getAsyncRemote().sendText(text);
+            synchronized (future) {
+                future.wait(2000);
+            }
+        } catch (InterruptedException e) {
+            log.error("Sending sse data timeout:{}", e.getMessage());
+            SpringUtil.getBean(GlobalWebSocket.class).onError(session, e);
+        }
     }
 }

@@ -218,6 +218,7 @@ export enum API_CONSTANTS {
   STUDIO_GET_MSSCHEMA_INFO = '/api/studio/getMSSchemaInfo',
   STUDIO_GET_MSCATALOGS = '/api/studio/getMSCatalogs',
   STUDIO_GET_MSCOLUMNS = '/api/studio/getMSColumns',
+  STUDIO_GET_COLUMNDATAANALYSIS = '/api/studio/getMSColumnDataAnalysis',
 
   // ------------------------------------ savepoints  ------------------------------------
   GET_SAVEPOINT_LIST_BY_TASK_ID = '/api/savepoints/listSavepointsByTaskId',
@@ -278,6 +279,7 @@ export enum API_CONSTANTS {
   GET_JOB_PLAN = '/api/task/getJobPlan',
   DEBUG_TASK = '/api/task/debugTask',
   SUBMIT_TASK = '/api/task/submitTask',
+  SUBMIT_TEMP_TASK = '/api/task/submitTempTask',
   CHANGE_TASK_LIFE = '/api/task/changeTaskLife',
   CATALOGUE_GET_CATALOGUE_TREE_DATA = '/api/catalogue/getCatalogueTreeData',
   CATALOGUE_GET_CATALOGUE_SORT_TYPE_DATA = '/api/catalogue/getCatalogueSortType',
