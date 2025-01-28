@@ -93,7 +93,7 @@ import { API_CONSTANTS } from '@/services/endpoints';
 import { Jobs, LineageDetailInfo } from '@/types/DevOps/data';
 import { lockTask, matchLanguage } from '@/pages/DataStudio/function';
 import { PushpinIcon } from '@/components/Icons/CustomIcons';
-import { assert, isSql } from '@/pages/DataStudio/utils';
+import { assert, isProgram, isSql } from '@/pages/DataStudio/utils';
 import { DIALECT } from '@/services/constants';
 import { SysConfigStateType } from '@/pages/SettingCenter/GlobalSetting/model';
 import CodeEdit from '@/components/CustomEditor/CodeEdit';
@@ -423,6 +423,7 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
   const rightToolbarItem: TabsProps['items'] = [];
   if (
     isSql(currentState.dialect) ||
+    isProgram(currentState.dialect) ||
     assert(currentState.dialect, [DIALECT.FLINK_SQL, DIALECT.FLINKJAR], true, 'includes')
   ) {
     rightToolbarItem.push({
@@ -562,7 +563,7 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
         if (result.data.status === 'SUCCESS') {
           setIsRunning(true);
         }
-        if (isSql(currentState.dialect) && result?.data?.result?.success) {
+        if ((isSql(currentState.dialect) || isProgram(currentState.dialect)) && result?.data?.result?.success) {
           updateAction({
             actionType: DataStudioActionType.TASK_PREVIEW_RESULT,
             params: {
@@ -608,7 +609,7 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
         if (result.data.status === 'SUCCESS') {
           setIsRunning(true);
         }
-        if (isSql(currentState.dialect) && result?.data?.result?.success) {
+        if ((isSql(currentState.dialect) || isProgram(currentState.dialect)) && result?.data?.result?.success) {
           updateAction({
             actionType: DataStudioActionType.TASK_PREVIEW_RESULT,
             params: {
@@ -864,10 +865,10 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
               isShow={
                 assert(
                   currentState.dialect,
-                  [DIALECT.JAVA, DIALECT.SCALA, DIALECT.PYTHON_LONG],
+                  [DIALECT.JAVA, DIALECT.SCALA, DIALECT.PYTHON_LONG, DIALECT.JYTHON_PROGRAM],
                   true,
                   'notIncludes'
-                ) && !isSql(currentState.dialect)
+                ) && !isSql(currentState.dialect) //&& !isProgram(currentState.dialect)
               }
               hotKey={{
                 ...hotKeyConfig,
@@ -916,7 +917,12 @@ export const SqlTask = memo((props: FlinkSqlProps & any) => {
                 <SelectDb databaseDataList={tempData.dataSourceDataList} data={currentState} />
               </>
             )}
-
+            {isProgram(currentState.dialect) && (
+              <>
+                <Divider type={'vertical'} style={{ height: dividerHeight }} />
+                <SelectDb databaseDataList={tempData.dataSourceDataList} data={currentState} />
+              </>
+            )}
             {assert(
               currentState.dialect,
               [DIALECT.JAVA, DIALECT.SCALA, DIALECT.PYTHON_LONG, DIALECT.FLINKSQLENV],

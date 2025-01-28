@@ -24,12 +24,13 @@ import { Tag } from 'antd';
 import { ProFormSelect } from '@ant-design/pro-components';
 import { l } from '@/utils/intl';
 import { TaskState, TempData } from '@/pages/DataStudio/type';
+import { isProgram, isSql } from '../../utils';
 
 export default (props: { databaseDataList: TempData['dataSourceDataList']; data: TaskState }) => {
   const dataSourceData: Record<string, React.ReactNode> = {};
   const { databaseDataList, data } = props;
   databaseDataList
-    .filter((x) => x.type.toLowerCase() === data?.dialect.toLowerCase())
+    .filter((x) => (x.type.toLowerCase() === data?.dialect.toLowerCase()) || (isProgram(data?.dialect) && isSql(x.type.toLowerCase())) )
     .forEach((item: DataSources.DataSource) => {
       dataSourceData[item.id] = item.name;
     });

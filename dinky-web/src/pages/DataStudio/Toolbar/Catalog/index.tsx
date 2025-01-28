@@ -37,7 +37,7 @@ import { getMSCatalogs, getMSColumns, getMSSchemaInfo } from './service';
 import { useAsyncEffect } from 'ahooks';
 import { CenterTab, DataStudioState } from '@/pages/DataStudio/model';
 import { mapDispatchToProps } from '@/pages/DataStudio/DvaFunction';
-import { isSql } from '@/pages/DataStudio/utils';
+import { isProgram, isSql } from '@/pages/DataStudio/utils';
 import { TableDataNode } from '@/pages/DataStudio/Toolbar/Catalog/data';
 import { DataStudioActionType } from '@/pages/DataStudio/data.d';
 import SchemaTree from '@/pages/RegCenter/DataSource/components/DataSourceDetail/SchemaTree';
@@ -108,7 +108,7 @@ const Catalog = (props: {
       } else if (dialect === DIALECT.FLINK_SQL) {
         envId = currentData.params.envId;
         engine = 'Flink';
-      } else if (isSql(dialect)) {
+      } else if (isSql(dialect) || isProgram(dialect)) {
         databaseId = currentData.params.databaseId;
         if (!databaseId) {
           setCatalogSelect([]);

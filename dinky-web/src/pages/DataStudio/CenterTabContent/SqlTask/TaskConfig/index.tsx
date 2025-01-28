@@ -18,14 +18,14 @@
  */
 
 import { Tabs, TabsProps } from 'antd';
-import { ProForm, ProFormDigit, ProFormGroup, ProFormSwitch } from '@ant-design/pro-components';
+import { ProForm, ProFormDigit, ProFormGroup, ProFormSwitch, ProFormTextArea } from '@ant-design/pro-components';
 import { l } from '@/utils/intl';
 import React from 'react';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { DIALECT, SWITCH_OPTIONS } from '@/services/constants';
 import { TaskState, TempData } from '@/pages/DataStudio/type';
 import { BasicConfig } from '@/pages/DataStudio/CenterTabContent/SqlTask/TaskConfig/BasicConfig';
-import { isSql, assert } from '@/pages/DataStudio/utils';
+import { isSql, assert, isProgram } from '@/pages/DataStudio/utils';
 import { JOB_LIFE_CYCLE } from '@/pages/DevOps/constants';
 
 export default (props: {
@@ -54,10 +54,10 @@ export default (props: {
   }
   if (
     isSql(data.dialect) ||
-    assert(data.dialect, [DIALECT.FLINK_SQL, DIALECT.FLINKJAR], true, 'includes')
+    assert(data.dialect, [DIALECT.FLINK_SQL, DIALECT.FLINKJAR], true, 'includes') || isProgram(data.dialect)
   ) {
     const renderOtherConfig = () => {
-      if (!isSql(data.dialect)) {
+      if (!isSql(data.dialect) && !isProgram(data.dialect)) {
         return (
           <>
             <ProFormSwitch
@@ -120,6 +120,67 @@ export default (props: {
         </ProForm>
       )
     });
+
+    if (isProgram(data.dialect)) {
+      console.log(props.data)
+      let data:any = {
+        executeTimeout: 180
+      }
+      props.data.configJson?.customConfig?.forEach((element:any) => {
+        console.log(element);
+        data[element.key] = element.value;
+    });
+
+      items.push({
+        key: 'executeConfig',
+        label: "执行配置",
+        children: (
+          <ProForm
+            className={'datastudio-theme'}
+            initialValues={{
+              ...data
+            }}
+            disabled={props.data?.step === JOB_LIFE_CYCLE.PUBLISH || props.isLockTask}
+            style={{ padding: '10px' }}
+            submitter={false}
+            layout='vertical'
+            onValuesChange={(changedValues: any, values: any) => {
+             console.log(values)
+
+            let value:any = {
+              configJson:{
+                customConfig:[]
+              }
+            };
+
+            for (const [key, e] of Object.entries(values)) {
+              value.configJson.customConfig.push({
+                key:key,
+                value:e
+              });
+            }
+
+              if(props.onValuesChange){
+                props.onValuesChange(value,value);
+              }
+            }}
+          >
+            <ProFormGroup style={{ display: 'flex', justifyContent: 'center' }}>
+              <ProFormDigit
+                width={'xs'}
+                label={"超时时间"}
+                // initialValue={'[{"key":"executeTimeout","value":"180"}]'}
+                name='executeTimeout'
+                tooltip={"0表示永不超时"}
+                min={0}
+                max={9999}
+              />
+            </ProFormGroup>
+          </ProForm>
+        )
+      });
+    }
+
   }
 
   return <Tabs items={items} centered />;

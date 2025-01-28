@@ -53,6 +53,11 @@ export type RightContextProps = {
   updateAction: any;
   users: UserBaseInfo.User[];
 };
+/**
+ *
+ * @param props
+ * @returns
+ */
 export const useRightContext = (props: RightContextProps) => {
   const {
     selectKeys,
@@ -92,6 +97,7 @@ export const useRightContext = (props: RightContextProps) => {
 
   /**
    * the right click event
+   * 右键事件
    * @param info
    */
   const handleProjectRightClick = (info: any) => {
@@ -354,6 +360,9 @@ export const useRightContext = (props: RightContextProps) => {
   };
 
   return {
+    /**
+     * 右键菜单UI
+     */
     RightContent: (
       <>
         {/*  added  sub folder  */}
@@ -439,6 +448,7 @@ export const useRightContext = (props: RightContextProps) => {
       </>
     ),
     setRightContextMenuState,
+    /** 右键事件 */
     handleProjectRightClick
   };
 };

@@ -380,7 +380,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         // 注解自调用会失效，这里通过获取对象方法绕过此限制
         TaskServiceImpl taskServiceBean = applicationContext.getBean(TaskServiceImpl.class);
         JobResult jobResult;
-        if (Dialect.isCommonSql(task.getDialect())) {
+        if (Dialect.isCommonSql(task.getDialect()) || Dialect.isProgram(task.getDialect())) {
             jobResult = taskServiceBean.executeJob(task, true);
         } else {
             jobResult = taskServiceBean.executeJob(task);
@@ -404,7 +404,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         boolean useSavepoint = !TextUtils.isEmpty(savePointPath);
 
         DinkyAssert.check(task);
-        if (!Dialect.isCommonSql(task.getDialect()) && Asserts.isNotNull(task.getJobInstanceId())) {
+        if (!Dialect.isCommonSql(task.getDialect()) && !Dialect.isProgram(task.getDialect()) && Asserts.isNotNull(task.getJobInstanceId())) {
             JobInstance jobInstance = jobInstanceService.getById(task.getJobInstanceId());
             DinkyAssert.checkNull(jobInstance, Status.JOB_INSTANCE_NOT_EXIST);
             String status = jobInstance.getStatus();
@@ -450,7 +450,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
 
     @Override
     public boolean cancelTaskJob(TaskDTO task, boolean withSavePoint, boolean forceCancel) {
-        if (Dialect.isCommonSql(task.getDialect())) {
+        if (Dialect.isCommonSql(task.getDialect()) || Dialect.isProgram(task.getDialect())) {
             return true;
         }
         JobInstance jobInstance = jobInstanceService.getById(task.getJobInstanceId());
@@ -536,7 +536,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
     public String exportSql(Integer id) {
         TaskDTO task = this.getTaskInfoById(id);
         DinkyAssert.check(task);
-        if (Dialect.isCommonSql(task.getDialect())) {
+        if (Dialect.isCommonSql(task.getDialect()) || Dialect.isProgram(task.getDialect())) {
             return task.getStatement();
         }
 
@@ -1014,7 +1014,7 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
     @Override
     public LineageResult getTaskLineage(Integer id) {
         TaskDTO task = getTaskInfoById(id);
-        if (Dialect.isCommonSql(task.getDialect())) {
+        if (Dialect.isCommonSql(task.getDialect()) || Dialect.isProgram(task.getDialect())) {
             if (Asserts.isNull(task.getDatabaseId())) {
                 return null;
             }

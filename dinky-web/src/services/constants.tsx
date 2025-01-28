@@ -201,6 +201,7 @@ export const DIALECT = {
   MARKDOWN: 'markdown',
   SCALA: 'scala',
   PYTHON: 'py',
+  JYTHON_PROGRAM: 'jythonprogram',
   PYTHON_LONG: 'python',
   YML: 'yml',
   YAML: 'yaml',

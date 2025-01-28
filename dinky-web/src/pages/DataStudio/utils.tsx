@@ -94,6 +94,23 @@ export const isSql = (dialect: string = '', includedFlinkSQL: boolean = false) =
 };
 
 /**
+ * @description: 判断是否为 编程式 方言 | assert is program dialect
+ * @param dialect
+ * @param includedFlinkSQL
+ */
+export const isProgram = (dialect: string = '') => {
+  if (!dialect || dialect === '') {
+    return false;
+  }
+  switch (dialect.toLowerCase()) {
+    case DIALECT.JYTHON_PROGRAM:
+      return true;
+    default:
+      return false;
+  }
+};
+
+/**
  * 判断 不为空或者不为 undefined | determine whether it is not empty or not undefined
  * @param value
  */

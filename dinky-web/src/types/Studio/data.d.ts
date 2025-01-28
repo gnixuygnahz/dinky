@@ -55,9 +55,9 @@ export type ConfigItem = {
 };
 
 export type TaskExtConfig = {
-  udfRefer: List<TaskUdfRefer>;
+  udfRefer?: List<TaskUdfRefer>;
   udfConfig?: TaskUdfConfig;
-  customConfig: List<Map<string, object>>;
+  customConfig?: List<Map<string, object>>;
 };
 
 export type TaskInfo = {

@@ -50,25 +50,13 @@ export const TAG_RIGHT_CONTEXT_MENU: MenuItemType[] = [
  */
 export const JOB_TYPE: DefaultOptionType[] = [
   {
-    label: 'Flink Job Type',
+    // label: 'Jdbc Query Type',
+    label: 'SQL类型',
     options: [
       {
-        value: 'FlinkSql',
-        label: 'FlinkSql'
+        value: 'Doris',
+        label: 'Doris'
       },
-      {
-        value: 'FlinkJar',
-        label: 'FlinkJar'
-      },
-      {
-        value: 'FlinkSqlEnv',
-        label: 'FlinkSqlEnv'
-      }
-    ]
-  },
-  {
-    label: 'Jdbc Query Type',
-    options: [
       {
         value: 'Mysql',
         label: 'Mysql'
@@ -90,10 +78,6 @@ export const JOB_TYPE: DefaultOptionType[] = [
         label: 'ClickHouse'
       },
       {
-        value: 'Doris',
-        label: 'Doris'
-      },
-      {
         value: 'Hive',
         label: 'Hive'
       },
@@ -112,7 +96,33 @@ export const JOB_TYPE: DefaultOptionType[] = [
     ]
   },
   {
-    label: 'Other Type',
+    label: '编程式类型',
+    options: [
+      {
+        value: 'JythonProgram',
+        label: 'Jython'
+      },
+    ]
+  },
+  {
+    label: 'Flink作业类型',
+    options: [
+      {
+        value: 'FlinkSql',
+        label: 'FlinkSql'
+      },
+      {
+        value: 'FlinkJar',
+        label: 'FlinkJar'
+      },
+      {
+        value: 'FlinkSqlEnv',
+        label: 'FlinkSqlEnv'
+      }
+    ]
+  },
+  {
+    label: '其他类型',
     options: [
       {
         value: 'Java',

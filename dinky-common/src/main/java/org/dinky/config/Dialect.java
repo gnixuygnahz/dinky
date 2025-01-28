@@ -44,7 +44,7 @@ public enum Dialect {
     HIVE("Hive"),
     STAR_ROCKS("StarRocks"),
     PRESTO("Presto"),
-    JYTHON("Jython"),
+    JYTHON_PROGRAM("JythonProgram"),
     KUBERNETES_APPLICATION("KubernetesApplication");
 
     private String value;
@@ -134,10 +134,10 @@ public enum Dialect {
         }
     }
 
-    public static boolean isJython(String value) {
+    public static boolean isProgram(String value) {
         Dialect dialect = Dialect.get(value);
         switch (dialect) {
-            case JYTHON:
+            case JYTHON_PROGRAM:
                 return true;
             default:
                 return false;

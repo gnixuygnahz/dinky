@@ -11,13 +11,15 @@ import org.dinky.data.model.DataBase;
 import org.dinky.job.JobResult;
 import org.dinky.metadata.driver.Driver;
 import org.dinky.service.DataBaseService;
+import org.python.core.AstList;
 import org.python.util.PythonInterpreter;
 
+import java.util.List;
 import java.util.concurrent.*;
 
 @Slf4j
 @SupportDialect({
-        Dialect.JYTHON
+        Dialect.JYTHON_PROGRAM
 })
 public class JythonTask extends BaseTask {
 
@@ -34,24 +36,35 @@ public class JythonTask extends BaseTask {
     public JobResult execute() throws Exception {
         log.info("Preparing to execute common sql...");
 //        SqlDTO sqlDTO = SqlDTO.build(task.getStatement(), task.getDatabaseId(), null);
-        SqlDTO sqlDTO = SqlDTO.build("select 1", task.getDatabaseId(), null);
+        SqlDTO sqlDTO = SqlDTO.build("select 1", task.getDatabaseId(), 100);
         DataBaseService dataBaseService = SpringUtil.getBean(DataBaseService.class);
         JobResult jobResult = dataBaseService.executeCommonSql(sqlDTO);
         DataBase dataBase = dataBaseService.getById(task.getDatabaseId());
+        final List<JobResult> jobResultFromPy = new AstList();
 
         // 超时时间默认3分钟
-        int timeout = Integer.parseInt(task.getConfigJson().getCustomConfigMaps().getOrDefault("execute_timeout", "180"));
+        int timeout = 180;
+        if (task.getConfigJson() != null && task.getConfigJson().getCustomConfigMaps() != null) {
+            timeout = Integer.parseInt(task.getConfigJson().getCustomConfigMaps().getOrDefault("executeTimeout", "180"));
+        }
         ExecutorService executor = Executors.newSingleThreadExecutor();
         FutureTask<Void> future =
                 new FutureTask<>(() -> {
                     if (Asserts.isNotNull(dataBase)) {
                         Driver driver = Driver.build(dataBase.getDriverConfig());
+//                        driver.query()
                         try (PythonInterpreter interpreter = new PythonInterpreter()) {
-                            interpreter.set("ds", driver);
+//                            interpreter.set("ds", driver);
+                            interpreter.set("ds", dataBaseService);
+                            interpreter.set("sql", sqlDTO);
                             interpreter.set("log", log);
+                            interpreter.set("output", jobResultFromPy);
                             interpreter.exec(task.getStatement());
+                            jobResultFromPy.add((JobResult)interpreter.get("output").__tojava__(JobResult.class));
                         } catch (Exception e) {
                             log.error("执行异常", e);
+                            jobResult.setError(e.getMessage());
+                            jobResult.setSuccess(false);
                         }
                     }
                     return null;
@@ -66,14 +79,25 @@ public class JythonTask extends BaseTask {
 
         } catch (InterruptedException e) {
             log.error("执行中断", e);
+            jobResult.setError(e.getMessage());
+            jobResult.setSuccess(false);
         } catch (ExecutionException e) {
             log.error("执行异常", e);
+            jobResult.setError(e.getMessage());
+            jobResult.setSuccess(false);
         } catch (TimeoutException e) {
             log.error("执行超时", e);
+            jobResult.setError(e.getMessage());
+            jobResult.setSuccess(false);
         } finally {
             executor.shutdown();
         }
-
+        if (!jobResult.isSuccess()) {
+            return jobResult;
+        }
+        if (!jobResultFromPy.isEmpty() && jobResultFromPy.get(0)!=null) {
+            return jobResultFromPy.get(0);
+        }
         return jobResult;
     }
 

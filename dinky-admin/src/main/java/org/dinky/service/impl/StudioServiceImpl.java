@@ -149,7 +149,7 @@ public class StudioServiceImpl implements StudioService {
     @Override
     public List<Catalog> getMSCatalogs(StudioMetaStoreDTO studioMetaStoreDTO) {
         List<Catalog> catalogs = new ArrayList<>();
-        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect())) {
+        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect()) || Dialect.isProgram(studioMetaStoreDTO.getDialect())) {
             DataBase dataBase = dataBaseService.getById(studioMetaStoreDTO.getDatabaseId());
             if (!Asserts.isNull(dataBase)) {
                 Catalog defaultCatalog = Catalog.build(DEFAULT_CATALOG);
@@ -172,7 +172,7 @@ public class StudioServiceImpl implements StudioService {
         String database = studioMetaStoreDTO.getDatabase();
         Schema schema = Schema.build(database);
         List<Table> tables = new ArrayList<>();
-        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect())) {
+        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect()) || Dialect.isProgram(studioMetaStoreDTO.getDialect())) {
             DataBase dataBase = dataBaseService.getById(studioMetaStoreDTO.getDatabaseId());
             if (Asserts.isNotNull(dataBase)) {
                 Driver driver = Driver.build(dataBase.getDriverConfig());
@@ -196,7 +196,7 @@ public class StudioServiceImpl implements StudioService {
         String database = studioMetaStoreDTO.getDatabase();
         String tableName = studioMetaStoreDTO.getTable();
         List<Column> columns = new ArrayList<>();
-        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect())) {
+        if (Dialect.isCommonSql(studioMetaStoreDTO.getDialect()) || Dialect.isProgram(studioMetaStoreDTO.getDialect())) {
             DataBase dataBase = dataBaseService.getById(studioMetaStoreDTO.getDatabaseId());
             if (Asserts.isNotNull(dataBase)) {
                 Driver driver = Driver.build(dataBase.getDriverConfig());

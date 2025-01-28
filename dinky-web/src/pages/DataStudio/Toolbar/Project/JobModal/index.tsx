@@ -49,6 +49,11 @@ type JobModalProps = {
   values: Partial<Catalogue>;
   users: UserBaseInfo.User[];
 };
+/**
+ * 创建作业窗口
+ * @param props 
+ * @returns 
+ */
 const JobModal: React.FC<JobModalProps> = (props) => {
   const { onCancel, onSubmit, modalVisible, title, values, users } = props;
   const [jobType, setJobType] = React.useState<string>(values.type ?? DIALECT.FLINK_SQL);

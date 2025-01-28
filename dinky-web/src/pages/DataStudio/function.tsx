@@ -54,10 +54,10 @@ import {
   SqlServerIcons,
   StarRocksIcons
 } from '@/components/Icons/DBIcons';
-import { CodeTwoTone } from '@ant-design/icons';
+import { CaretRightOutlined, CodeTwoTone } from '@ant-design/icons';
 import { UserBaseInfo } from '@/types/AuthCenter/data.d';
 import { TaskOwnerLockingStrategy } from '@/types/SettingCenter/data.d';
-import { Col, Row } from 'antd';
+import { Badge, Col, Row } from 'antd';
 import { l } from '@/utils/intl';
 
 // 遍历layout，获取所有激活和打开的tab
@@ -233,6 +233,10 @@ export const getTabIcon = (type: string, size?: number) => {
       return <PrestoIcons size={size} />;
     case DIALECT.TERMINAL:
       return <CodeTwoTone size={size} />;
+    case DIALECT.JYTHON_PROGRAM:
+      return <Badge offset={[-2,15]} status="success" count={<CaretRightOutlined style={{ color: 'green' }} />}>
+        <PythonSvg size={size} />
+      </Badge>
     default:
       return <FileIcon />;
   }
@@ -343,6 +347,8 @@ export const matchLanguage = (language = DIALECT.FLINK_SQL) => {
       return DIALECT.SCALA;
     case DIALECT.JAVA:
       return DIALECT.JAVA;
+      case DIALECT.JYTHON_PROGRAM:
+        return DIALECT.PYTHON_LONG;
     default:
       return DIALECT.SQL;
   }
