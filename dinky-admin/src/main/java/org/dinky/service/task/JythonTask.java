@@ -58,9 +58,11 @@ public class JythonTask extends BaseTask {
                             interpreter.set("ds", dataBaseService);
                             interpreter.set("sql", sqlDTO);
                             interpreter.set("log", log);
-                            interpreter.set("output", jobResultFromPy);
+//                            interpreter.set("output", jobResultFromPy);
                             interpreter.exec(task.getStatement());
-                            jobResultFromPy.add((JobResult)interpreter.get("output").__tojava__(JobResult.class));
+                            if (interpreter.get("output") != null) {
+                                jobResultFromPy.add((JobResult)interpreter.get("output").__tojava__(JobResult.class));
+                            }
                         } catch (Exception e) {
                             log.error("执行异常", e);
                             jobResult.setError(e.getMessage());

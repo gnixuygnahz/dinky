@@ -22,6 +22,7 @@ package org.dinky;
 import org.dinky.data.constant.DirConstant;
 import org.dinky.security.NoExitSecurityManager;
 
+import org.python.util.PythonInterpreter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
@@ -49,6 +50,8 @@ public class Dinky {
 
     @SneakyThrows
     public static void main(String[] args) {
+        new PythonInterpreter(); // 预热
+
         // Prevent System.exit calls
         System.setSecurityManager(new NoExitSecurityManager());
         // Initialize the JDBC Driver, because the number of packages is very large, so it needs to be executed

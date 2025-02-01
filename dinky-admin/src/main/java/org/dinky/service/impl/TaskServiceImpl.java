@@ -101,14 +101,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -333,6 +328,12 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
         TaskDTO taskDTO = taskServiceBean.prepareTask(submitDto);
         // The statement set is enabled by default when submitting assignments
         taskDTO.setStatementSet(true);
+
+        if (Dialect.isProgram(taskDTO.getDialect())) {
+            taskDTO.setStatement(preProgramTaskStatement(submitDto, new HashSet<>()));
+            log.info("Program Job execute statement: [\n" + taskDTO.getStatement() + "\n]");
+        }
+
         JobResult jobResult = taskServiceBean.executeJob(taskDTO);
         if ((jobResult.getStatus() == Job.JobStatus.FAILED)) {
             throw new RuntimeException(jobResult.getError());
@@ -343,6 +344,38 @@ public class TaskServiceImpl extends SuperServiceImpl<TaskMapper, Task> implemen
             throw new BusException(Status.TASK_UPDATE_FAILED.getMessage());
         }
         return jobResult;
+    }
+
+    /**
+     * @param submitDto 当前
+     * @param parents 父亲任务id列表
+     * @return
+     */
+    private String preProgramTaskStatement(TaskSubmitDto submitDto, Set<Integer> parents) {
+        if (parents.contains(submitDto.getId())) {
+            // 环
+            throw new RuntimeException("任务存在循环调用[" + submitDto.getId() + "]");
+        }
+        TaskServiceImpl taskServiceBean = applicationContext.getBean(TaskServiceImpl.class);
+        TaskDTO taskDTO = taskServiceBean.prepareTask(submitDto);
+        if (!Dialect.isProgram(taskDTO.getDialect())) {
+            return "";
+        }
+        String newStatement = taskDTO.getStatement();
+        Set<Integer> newParents = new HashSet<>(parents);
+        newParents.add(submitDto.getId());
+        Pattern pattern = Pattern.compile("#\\{include:(\\d*)}");
+        Matcher matcher = pattern.matcher(taskDTO.getStatement());
+        Set<Integer> exist = new HashSet<>();
+        while(matcher.find()) {
+            if (exist.contains(Integer.parseInt(matcher.group(1)))) {
+                continue;
+            }
+            exist.add(Integer.parseInt(matcher.group(1)));
+            newStatement = newStatement.replaceAll("#\\{include:"+matcher.group(1)+"}",
+                    preProgramTaskStatement(TaskSubmitDto.builder().id(Integer.parseInt(matcher.group(1))).build(), newParents));
+        }
+        return newStatement;
     }
 
     @Override

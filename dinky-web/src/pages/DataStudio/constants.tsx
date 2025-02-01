@@ -61,38 +61,38 @@ export const JOB_TYPE: DefaultOptionType[] = [
         value: 'Mysql',
         label: 'Mysql'
       },
-      {
-        value: 'Oracle',
-        label: 'Oracle'
-      },
+      // {
+      //   value: 'Oracle',
+      //   label: 'Oracle'
+      // },
       {
         value: 'SqlServer',
         label: 'SqlServer'
       },
-      {
-        value: 'PostgreSql',
-        label: 'PostgreSql'
-      },
-      {
-        value: 'ClickHouse',
-        label: 'ClickHouse'
-      },
-      {
-        value: 'Hive',
-        label: 'Hive'
-      },
-      {
-        value: 'Phoenix',
-        label: 'Phoenix'
-      },
-      {
-        value: 'StarRocks',
-        label: 'StarRocks'
-      },
-      {
-        value: 'Presto',
-        label: 'Presto'
-      }
+      // {
+      //   value: 'PostgreSql',
+      //   label: 'PostgreSql'
+      // },
+      // {
+      //   value: 'ClickHouse',
+      //   label: 'ClickHouse'
+      // },
+      // {
+      //   value: 'Hive',
+      //   label: 'Hive'
+      // },
+      // {
+      //   value: 'Phoenix',
+      //   label: 'Phoenix'
+      // },
+      // {
+      //   value: 'StarRocks',
+      //   label: 'StarRocks'
+      // },
+      // {
+      //   value: 'Presto',
+      //   label: 'Presto'
+      // }
     ]
   },
   {
@@ -104,40 +104,40 @@ export const JOB_TYPE: DefaultOptionType[] = [
       },
     ]
   },
-  {
-    label: 'Flink作业类型',
-    options: [
-      {
-        value: 'FlinkSql',
-        label: 'FlinkSql'
-      },
-      {
-        value: 'FlinkJar',
-        label: 'FlinkJar'
-      },
-      {
-        value: 'FlinkSqlEnv',
-        label: 'FlinkSqlEnv'
-      }
-    ]
-  },
-  {
-    label: '其他类型',
-    options: [
-      {
-        value: 'Java',
-        label: 'Java'
-      },
-      {
-        value: 'Scala',
-        label: 'Scala'
-      },
-      {
-        value: 'Python',
-        label: 'Python'
-      }
-    ]
-  }
+  // {
+  //   label: 'Flink作业类型',
+  //   options: [
+  //     {
+  //       value: 'FlinkSql',
+  //       label: 'FlinkSql'
+  //     },
+  //     {
+  //       value: 'FlinkJar',
+  //       label: 'FlinkJar'
+  //     },
+  //     {
+  //       value: 'FlinkSqlEnv',
+  //       label: 'FlinkSqlEnv'
+  //     }
+  //   ]
+  // },
+  // {
+  //   label: '其他类型',
+  //   options: [
+  //     {
+  //       value: 'Java',
+  //       label: 'Java'
+  //     },
+  //     {
+  //       value: 'Scala',
+  //       label: 'Scala'
+  //     },
+  //     {
+  //       value: 'Python',
+  //       label: 'Python'
+  //     }
+  //   ]
+  // }
 ];
 
 export const SAVE_POINT_TYPE: DefaultOptionType[] = [
