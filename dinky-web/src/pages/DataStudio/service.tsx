@@ -60,7 +60,7 @@ export async function executeSql(title: string, id: number) {
   return handleGetOption(API_CONSTANTS.SUBMIT_TASK, title, { id });
 }
 export async function executeTempSql(title: string, id: number, statement: string) {
-  return handleGetOption(API_CONSTANTS.SUBMIT_TEMP_TASK, title, { id, statement });
+  return handleOption(API_CONSTANTS.SUBMIT_TEMP_TASK, title, { id, statement });
 }
 export function restartTask(id: number, savePointPath: string, title: string) {
   return handleGetOption(API_CONSTANTS.RESTART_TASK, title, { id, savePointPath });

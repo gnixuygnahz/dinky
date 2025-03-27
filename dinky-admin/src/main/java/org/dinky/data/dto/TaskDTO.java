@@ -245,6 +245,13 @@ public class TaskDTO extends AbstractStatementDTO {
     @ApiModelProperty(value = "Update Time", dataType = "LocalDateTime", example = "2021-05-28 00:00:00")
     private LocalDateTime updateTime;
 
+    @ApiModelProperty(
+            value = "Statement",
+            dataType = "String",
+            example = "select 1;",
+            notes = "Statement")
+    private String statement;
+
     public JobConfig getJobConfig() {
 
         Map<String, String> parsedConfig =

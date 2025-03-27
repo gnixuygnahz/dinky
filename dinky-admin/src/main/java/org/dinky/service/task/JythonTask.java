@@ -12,6 +12,7 @@ import org.dinky.job.JobResult;
 import org.dinky.metadata.driver.Driver;
 import org.dinky.service.DataBaseService;
 import org.python.core.AstList;
+import org.python.core.Py;
 import org.python.util.PythonInterpreter;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class JythonTask extends BaseTask {
                             interpreter.set("sql", sqlDTO);
                             interpreter.set("log", log);
 //                            interpreter.set("output", jobResultFromPy);
-                            interpreter.exec(task.getStatement());
+                            interpreter.exec(Py.newStringUTF8(task.getStatement()));
                             if (interpreter.get("output") != null) {
                                 jobResultFromPy.add((JobResult)interpreter.get("output").__tojava__(JobResult.class));
                             }

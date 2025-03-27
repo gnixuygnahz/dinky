@@ -135,11 +135,28 @@ public abstract class AbstractJdbcDriver extends AbstractDriver<AbstractJdbcConf
         ds.setInitialSize(1);
         ds.setMaxActive(8);
         ds.setMinIdle(5);
-        ds.setMinEvictableIdleTimeMillis(60000);
-        ds.setValidationQueryTimeout(5000);
-        ds.setMaxEvictableIdleTimeMillis(60000);
-        ds.setTimeBetweenEvictionRunsMillis(60000);
     }
+
+//    protected void createDataSource(DruidDataSource ds, AbstractJdbcConfig connectConfig) {
+//        ds.setName(config.getName().replaceAll("[^\\w]", ""));
+//        ds.setUrl(connectConfig.getUrl());
+//        ds.setDriverClassName(getDriverClass());
+//        ds.setUsername(connectConfig.getUsername());
+//        ds.setPassword(connectConfig.getPassword());
+//        ds.setValidationQuery(validationQuery);
+//        ds.setTestWhileIdle(true);
+//        ds.setBreakAfterAcquireFailure(false);
+//        ds.setFailFast(true);
+//        ds.setInitialSize(1);
+//        ds.setMaxActive(8);
+//        ds.setMinIdle(5);
+//        ds.setMinEvictableIdleTimeMillis(30000);
+//        ds.setValidationQueryTimeout(5000);
+//        ds.setMaxEvictableIdleTimeMillis(60000);
+//        ds.setTimeBetweenEvictionRunsMillis(10000);
+//        ds.setMaxWait(30000);
+//        ds.setTestOnBorrow(true);
+//    }
 
     @Override
     public Driver connect() {

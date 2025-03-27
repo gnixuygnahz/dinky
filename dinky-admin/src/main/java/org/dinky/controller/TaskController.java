@@ -105,14 +105,14 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/submitTempTask")
+    @PostMapping("/submitTempTask")
     @ApiOperation("Submit Temp Task")
     @Log(title = "Submit Temp Task", businessType = BusinessType.SUBMIT)
     @ExecuteProcess(type = ProcessType.FLINK_SUBMIT)
     @CheckTaskOwner(checkParam = TaskId.class, checkInterface = TaskService.class)
-    public Result<JobResult> submitTempTask(@TaskId @ProcessId @RequestParam Integer id, @RequestParam String statement) throws Exception {
+    public Result<JobResult> submitTempTask(@RequestBody TaskDTO task) throws Exception {
         JobResult jobResult =
-                taskService.submitTempTask(TempTaskSubmitDto.builder().id(id).statement(statement).build());
+                taskService.submitTempTask(TempTaskSubmitDto.builder().id(task.getId()).statement(task.getStatement()).build());
         if (jobResult.isSuccess()) {
             return Result.succeed(jobResult, Status.EXECUTE_SUCCESS);
         } else {
